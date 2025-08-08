@@ -52,7 +52,7 @@ class Game(private val rows: Int, private val cols: Int, private val numMines: I
                 }
                 if (firstMove) {
                     board.generateMines(x, y)
-                    board.calculateAdjacents()
+                    board.calculateAdjacencies()
                     firstMove = false
                 }
                 val hitMine = board.revealCell(x, y)

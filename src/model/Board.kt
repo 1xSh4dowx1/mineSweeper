@@ -7,14 +7,14 @@ import kotlin.random.Random
  * Handles mine placement, cell revealing, and game logic.
  */
 class Board(private val rows: Int, private val cols: Int, private val numMines: Int) {
-    val grid: Array<Array<Cell>> = Array(rows) { row ->
+    private val grid: Array<Array<Cell>> = Array(rows) { row ->
         Array(cols) { col -> Cell(row, col) }
     }
 
     /**
      * Checks if coordinates are within the board bounds.
      */
-    fun inBounds(x: Int, y: Int): Boolean = x in 0 until rows && y in 0 until cols
+    fun inBounds(x: Int, y: Int): Boolean = x in 0..<rows && y in 0..<cols
 
     /**
      * Randomly places mines on the board, avoiding the first clicked cell.
@@ -34,9 +34,9 @@ class Board(private val rows: Int, private val cols: Int, private val numMines: 
     /**
      * Calculates the number of adjacent mines for each cell.
      */
-    fun calculateAdjacents() {
-        for (x in 0 until rows) {
-            for (y in 0 until cols) {
+    fun calculateAdjacencies() {
+        for (x in 0..<rows) {
+            for (y in 0..<cols) {
                 if (!grid[x][y].isMine) {
                     grid[x][y].adjacentMines = neighbors(x, y).count { it.isMine }
                 }
@@ -95,24 +95,40 @@ class Board(private val rows: Int, private val cols: Int, private val numMines: 
     }
 
     /**
-     * Prints the current state of the board to the console.
+     * A red color function for the board
+     */
+    private fun red(text: String): String = "\u001B[31m$text\u001B[0m"
+
+    /**
+     * A green color function for the board
+     */
+    private fun green(text: String): String = "\u001B[32m$text\u001B[0m"
+
+    /**
+     * Prints the current state of the board to the console,
+     * with each column occupying 2 spaces for lineament.
      * @param showMines Whether to reveal all mines
      */
     fun printBoard(showMines: Boolean = false) {
-        println("   " + (0 until cols).joinToString(" ") { it.toString().padStart(2) })
-        for (x in 0 until rows) {
-            print("${x.toString().padStart(2)} ")
-            for (y in 0 until cols) {
+        print("   ")
+        for (col in 0..<cols) {
+            print(col.toString().padStart(2))
+        }
+        println()
+
+        for (x in 0..<rows) {
+            print(x.toString().padStart(2) + " ")
+            for (y in 0..<cols) {
                 val cell = grid[x][y]
                 val symbol = when {
-                    cell.isFlagged -> "🚩"
-                    !cell.isRevealed && showMines && cell.isMine -> "💣"
-                    !cell.isRevealed -> "🟦"
-                    cell.isMine -> "💣"
-                    cell.adjacentMines > 0 -> cell.adjacentMines.toString()
-                    else -> "⬜"
+                    cell.isFlagged -> " ${red("F")}"
+                    !cell.isRevealed && showMines && cell.isMine -> " ${red("X")}"
+                    !cell.isRevealed -> " ${green("*")}"
+                    cell.isMine -> " ${red("X")}"
+                    cell.adjacentMines > 0 -> " ${cell.adjacentMines}"
+                    else -> " #"
                 }
-                print("$symbol ")
+                print(symbol)
             }
             println()
         }
